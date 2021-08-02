@@ -3,13 +3,18 @@ Strictly developed to help students, not for anyother purpose.
 
 run the pip install command to install the requirements
 """
-#!pip install requests,tabula-py,beautifulsoup4,pandas
+#!pip install requests,tabula-py,beautifulsoup4,pandas,flask,flask-cors
 from pprint import pprint
-
 import requests
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 import tabula
 from bs4 import BeautifulSoup
+
+from flask import Flask, request, jsonify,render_template
+import os
+from flask_cors import CORS, cross_origin
+app = Flask(__name__)
+CORS(app)
 
 def download_and_process_pdf(link: str,ref_no : int) -> dict:
     result_dict = {}
@@ -35,23 +40,33 @@ def process_pdf(html_obj: BeautifulSoup,ref_no : int,base_url : str = 'https://d
 
     return dict(result, **(dict_resp))
 
-ref_no = int(input("Enter your IRL ref number (without IRL)"))
+@app.route("/search", methods=['GET','POST'])
+@cross_origin()
+def search():
+    #ref_no = int(input("Enter your IRL ref number (without IRL)"))
 
-base_url = 'https://dfa.ie'
-visa_decision_url = "/irish-embassy/india/visas/processing-times-decisions-appeals/discoverytabbody2/#d.en.325193"
+    ref_no = int(request.json['ref_no'])
 
-data= requests.get(base_url+visa_decision_url,verify=False)
+    base_url = 'https://dfa.ie'
+    visa_decision_url = "/irish-embassy/india/visas/processing-times-decisions-appeals/discoverytabbody2/#d.en.325193"
 
-soup = BeautifulSoup(data.text,'html.parser')
-decisions_pdf = soup.find_all('div',class_= "gen-content-landing__block")
-decisions_pdf = decisions_pdf[1:11]
-result={}
+    data= requests.get(base_url+visa_decision_url,verify=False)
 
-#print(decisions_pdf)
-for i in decisions_pdf:
-    result = process_pdf(html_obj=i,ref_no=ref_no)
+    soup = BeautifulSoup(data.text,'html.parser')
+    decisions_pdf = soup.find_all('div',class_= "gen-content-landing__block")
+    decisions_pdf = decisions_pdf[1:11]
+    result={}
 
-    if (result["found"]=="Y"):
-        break
+    #print(decisions_pdf)
+    for i in decisions_pdf:
+        result = process_pdf(html_obj=i,ref_no=ref_no)
+        if (result["found"]=="Y"):
+            break
 
-pprint(result)
+    #pprint(result)
+    return jsonify(result)
+
+
+if __name__ == "__main__":
+    #app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000, debug=True)
