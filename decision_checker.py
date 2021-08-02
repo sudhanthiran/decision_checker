@@ -1,8 +1,10 @@
 """
 Strictly developed to help students, not for anyother purpose.
 
+run the pip install command to install the requirements
 """
 #!pip install requests,tabula-py,beautifulsoup4,pandas
+from pprint import pprint
 
 import requests
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -42,7 +44,7 @@ data= requests.get(base_url+visa_decision_url,verify=False)
 
 soup = BeautifulSoup(data.text,'html.parser')
 decisions_pdf = soup.find_all('div',class_= "gen-content-landing__block")
-decisions_pdf = decisions_pdf[1:]
+decisions_pdf = decisions_pdf[1:11]
 result={}
 
 #print(decisions_pdf)
@@ -52,4 +54,4 @@ for i in decisions_pdf:
     if (result["found"]=="Y"):
         break
 
-print(result)
+pprint(result)
