@@ -2,7 +2,7 @@
 Strictly developed to help students, not for anyother purpose.
 
 """
-#!pip install requests,tabula,beautifulsoup4,pandas
+#!pip install requests,tabula-py,beautifulsoup4,pandas
 
 import requests
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
